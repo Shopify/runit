@@ -60,7 +60,15 @@ when 'debian', 'gentoo'
     end
   end
 
-  package 'runit' do
+  pv = node['platform_version']
+  pkg_name = if (platform?('debian') && pv.to_i >= 9) || \
+                (platform?('ubuntu') && Gem::Version.new(pv) >= Gem::Version.new('17.10'))
+               'runit-systemd'
+             else
+               'runit'
+             end
+
+  package pkg_name do
     action :install
     response_file 'runit.seed' if platform?('ubuntu', 'debian')
     notifies value_for_platform(
